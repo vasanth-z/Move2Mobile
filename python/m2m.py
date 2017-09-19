@@ -30,25 +30,30 @@ class ProgressPercentage(object):
         self._seen_so_far = 0
         self._lock = threading.Lock()
     def __call__(self, bytes_amount):
-        # To simplify we'll assume this is hooked up
-        # to a single filename.
+        global percentage
+        # To simplify we'll assume this is hooked up to a single filename.
         with self._lock:
             self._seen_so_far += bytes_amount
-            percentage = (self._seen_so_far / self._size) * 100
-            sys.stdout.write("%.0f%% " % (percentage))
-            sys.stdout.flush()
+            percentage = int((self._seen_so_far / self._size) * 100)                        
+            if (percentage%5==0):
+                 sys.stdout.write("%s%% " % (percentage))
+                 sys.stdout.flush()
 			
 # FUNCTIONS ####################################################
 def print_valid_commands(commingfrom=None):
-	print ('Invalid command type - ', commingfrom)
-	print ('valid commands are:')
-	print ('---------------------')
-	print ('m2m upload android')	
-	print ('m2m upload android x86')
-	print ('m2m upload android arm')
-	print ('m2m list')		
-	sys.exit()
-	
+        if(commingfrom != 'no_invalid_command'):
+            print ('Invalid command type - ', commingfrom)
+
+        print ('valid commands are:')
+        print ('---------------------')
+        print ('m2m upload android')	
+        print ('m2m upload android x86')
+        print ('m2m upload android arm')
+        print ('m2m list')
+        print ('m2m help')
+        sys.exit()
+
+
 def print_keylists_as_text(desc=None):
 	print('print_keylists()-------start-------', desc)
 	print("ACCESS_KEY_ID- ", ACCESS_KEY_ID)
@@ -71,7 +76,14 @@ def m2m_config_sample_print():
 	print('BUCKET_NAME:trut-bucket')
 	print('ANDROID_MIDDLE_PATH:platforms,android,build,outputs,apk')
 	
-	
+def print_help_msg():
+        print('Welcome to Project Move2Mobile')
+        print('Assembled by vasanth')
+        print('please send your suggestion/comments to vasanthax@gmail.com ')
+        print('Released on 19/Sep/2017')
+        print_valid_commands('no_invalid_command')
+        
+        
 def read_m2mconfig_assign_global(m2m_config_filepath):	
 	global ACCESS_KEY_ID,ACCESS_SECRET_KEY,BUCKET_NAME,ANDROID_MIDDLE_PATH
 	my_file = Path(m2m_config_filepath)	
@@ -119,7 +131,7 @@ def upload_to_s3(filepath, filename):
 	s3 = boto3.client('s3',aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY)
 	#s3.Bucket(BUCKET_NAME).put_object(Key=filename, Body=data) , Callback=ProgressPercentage(filepath)
 	s3.upload_fileobj(data, BUCKET_NAME, filename, Callback=ProgressPercentage(filepath) )		
-	print ('upload_to_s3 ended : ', filepath )
+	print ('\n upload_to_s3 completed successfully for : ', filepath )
 	
 def prepare_for_upload(listofapps): 
 	for app in listofapps:
@@ -172,6 +184,7 @@ def show_valid_commands():
 	if (OP_CHOICE == '' ) : print_valid_commands('1')
 		
 	if (OP_CHOICE == 'list'):return
+	if (OP_CHOICE == 'help'):return
 						
 	if (OP_CHOICE == 'upload' ): True
 	else:	print_valid_commands('2')
@@ -208,8 +221,10 @@ if OP_CHOICE=='upload':
 		APP_BASEPATH = find_android_app_base_path()
 		listofapps = loop_all_apps_and_return_app_pathlist(APP_BASEPATH)
 		#print ('listofapps', listofapps)
-		prepare_for_upload(listofapps)						
+		prepare_for_upload(listofapps)
+		
 elif OP_CHOICE=='list':
 	list_from_s3()
 
-
+elif OP_CHOICE=='help':
+	print_help_msg()
