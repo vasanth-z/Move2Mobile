@@ -1,6 +1,7 @@
 import sys
 import os
 import os.path
+import threading
 import boto3
 from pathlib import Path
 from botocore.client import Config
@@ -21,6 +22,22 @@ OS_CHOICE = ''
 ARCH_CHOICE = ''
 CWD=''
 
+# CLASSES ######################################################
+class ProgressPercentage(object):
+    def __init__(self, filename):
+        self._filename = filename
+        self._size = float(os.path.getsize(filename))
+        self._seen_so_far = 0
+        self._lock = threading.Lock()
+    def __call__(self, bytes_amount):
+        # To simplify we'll assume this is hooked up
+        # to a single filename.
+        with self._lock:
+            self._seen_so_far += bytes_amount
+            percentage = (self._seen_so_far / self._size) * 100
+            sys.stdout.write("%.0f%% " % (percentage))
+            sys.stdout.flush()
+			
 # FUNCTIONS ####################################################
 def print_valid_commands(commingfrom=None):
 	print ('Invalid command type - ', commingfrom)
@@ -91,14 +108,18 @@ def find_abs_path(apppath):
 	basepath=find_android_app_base_path()
 	fullpath= os.path.join(basepath,apppath)
 	return fullpath
-		
+
+
 		
 def upload_to_s3(filepath, filename):
+	print ('filename - ',filename)
 	print ('upload_to_s3 started : ', filepath )			
 	data = open(filepath, 'rb')
-	s3 = boto3.resource('s3',aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY,config=Config(signature_version='s3v4'))
-	s3.Bucket(BUCKET_NAME).put_object(Key=filename, Body=data)
-	print ('upload_to_s3 ended : ', filepath )	
+	#s3 = boto3.resource('s3',aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY,config=Config(signature_version='s3v4'))
+	s3 = boto3.client('s3',aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY)
+	#s3.Bucket(BUCKET_NAME).put_object(Key=filename, Body=data) , Callback=ProgressPercentage(filepath)
+	s3.upload_fileobj(data, BUCKET_NAME, filename, Callback=ProgressPercentage(filepath) )		
+	print ('upload_to_s3 ended : ', filepath )
 	
 def prepare_for_upload(listofapps): 
 	for app in listofapps:
