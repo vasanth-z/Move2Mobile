@@ -15,7 +15,7 @@ ACCESS_KEY_ID = ''
 ACCESS_SECRET_KEY = ''
 BUCKET_NAME = ''
 ANDROID_MIDDLE_PATH=''
-#found from command line
+#read from command line
 PY_EXE_LOCATION =''
 OP_CHOICE = ''
 OS_CHOICE = ''
@@ -77,10 +77,8 @@ def m2m_config_sample_print():
 	print('ANDROID_MIDDLE_PATH:platforms,android,build,outputs,apk')
 	
 def print_help_msg():
-        print('Welcome to Project Move2Mobile')
-        print('Assembled by vasanth')
-        print('please send your suggestion/comments to vasanthax@gmail.com ')
-        print('Released on 19/Sep/2017')
+        print('Thank you for using Project Move2Mobile! - Released on 19/Sep/2017')
+        print('Send your suggestions/comments to vasanthax@gmail.com')
         print_valid_commands('no_invalid_command')
         
         
