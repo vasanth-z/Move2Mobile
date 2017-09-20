@@ -122,14 +122,14 @@ def find_abs_path(apppath):
 
 		
 def upload_to_s3(filepath, filename):
-	print ('filename - ',filename)
+	#print ('filename - ',filename)
 	print ('upload_to_s3 started : ', filepath )			
 	data = open(filepath, 'rb')
 	#s3 = boto3.resource('s3',aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY,config=Config(signature_version='s3v4'))
 	s3 = boto3.client('s3',aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY)
 	#s3.Bucket(BUCKET_NAME).put_object(Key=filename, Body=data) , Callback=ProgressPercentage(filepath)
 	s3.upload_fileobj(data, BUCKET_NAME, filename, Callback=ProgressPercentage(filepath) )		
-	print ('\n upload_to_s3 completed successfully for : ', filepath )
+	print (' success')
 	
 def prepare_for_upload(listofapps): 
 	for app in listofapps:
@@ -145,7 +145,7 @@ def prepare_for_upload(listofapps):
 		if(ARCH_CHOICE == ''):		
 			upload_to_s3(abspath, app)
 				
-	print('******************* all upload completed ************* ')
+	print('******************* all uploads are completed successfully************* ')
 
 def list_from_s3():
 	print ('***************list_from_s3 ********************' )		
@@ -179,7 +179,7 @@ def fill_globals_from_commands(args):
 def show_valid_commands():
 	_arch_choice = False
 	
-	if (OP_CHOICE == '' ) : print_valid_commands('1')
+	if (OP_CHOICE == '' ) : print_help_msg()
 		
 	if (OP_CHOICE == 'list'):return
 	if (OP_CHOICE == 'help'):return
